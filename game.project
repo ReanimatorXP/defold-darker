@@ -19,3 +19,5 @@ scale_mode = stretch
 [project]
 title = My Project
 
+[library]
+include_dirs = darker
