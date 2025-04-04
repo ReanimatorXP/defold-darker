@@ -1,0 +1,20 @@
+go.property("highlight_go", resource.material("/darker/materials/highlight_go.material"))
+
+local darker = require("darker.darker")
+
+function init(self)
+	darker.script = msg.url()
+    darker.highlight_go_mat = self.highlight_go
+end
+
+function on_message(self, message_id, message)
+	if message_id == darker.MSG_UPDATE_MASK then
+        darker.update_mask()
+
+    elseif message_id == darker.MSG_SPOTLIGHT then
+        darker.spotlight(message.targets)
+
+    elseif message_id == darker.MSG_REVERT_ORIGINAL_MATERIALS then
+        darker.revert_original_materials()
+    end
+end

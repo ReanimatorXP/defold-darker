@@ -1,0 +1,25 @@
+nodes {
+  size {
+    x: 960.0
+    y: 640.0
+  }
+  color {
+    x: 0.0
+    y: 0.0
+    z: 0.0
+  }
+  type: TYPE_BOX
+  id: "darker"
+  pivot: PIVOT_SW
+  adjust_mode: ADJUST_MODE_STRETCH
+  inherit_alpha: true
+  alpha: 0.8
+  size_mode: SIZE_MODE_AUTO
+  material: "darker"
+}
+material: "/builtins/materials/gui.material"
+adjust_reference: ADJUST_REFERENCE_PARENT
+materials {
+  name: "darker"
+  material: "/darker/materials/darker.material"
+}
