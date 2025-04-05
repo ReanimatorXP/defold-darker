@@ -38,10 +38,10 @@ declare module 'darker.darker' {
     
     /**
      * Sets up spotlight effect for specified game objects
-     * @param {hash[]} go_ids Array of game object IDs to highlight
+     * @param {Array<hash|string|url>|undefined} go_ids Array of game object IDs to highlight
      * @returns {boolean} True if spotlight was applied successfully, false otherwise
      */
-    export function spotlight(go_ids: hash[]): boolean;
+    export function spotlight(go_ids: Array<hash | string | url> | undefined): boolean;
     
     /**
      * Draws the mask to the render target (called from render_script)
