@@ -4,6 +4,9 @@
 Подразумевается использовать на gui ноде, которая будет перекрывать объекты, находящиеся под ней.
 Скрывать и показывать затемнение следует через управление самой gui-нодой с помощью API Defold.
 
+![image](https://github.com/user-attachments/assets/14ebeb78-ba49-4512-8769-ed91c24b767b)
+
+
 ## Установка
 1. Добавьте зависимость в `game.project`:
 https://github.com/ReanimatorXP/defold-darker/archive/refs/heads/master.zip
