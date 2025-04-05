@@ -12,17 +12,20 @@ function on_input(self, action_id, action)
 	-- Меняем подсветку при нажатии на экран
 	if action_id == hash("touch") and action.released then
 		-- Карусельный цикл
-		self.num = self.num % 3 + 1
+		self.num = self.num % 4 + 1
 
 		-- У первого объекта компонент sprite имеет имя "image"
 		-- У остальных объектов - стардартное имя "sprite", можно не указывать
-		local gameobject
+		local targets
 		if self.num == 1 then
-			gameobject = msg.url("defold1#image")
-		else
-			gameobject = go.get_id("defold" .. self.num)
+			targets = { msg.url("defold1#image") }
+		elseif self.num < 4 then
+			targets = { go.get_id("defold" .. self.num) }
+		elseif self.num == 4 then
+			-- Передаём nil (или пустую таблицу) чтобы очистить маску
+			targets = nil
 		end
 
-		darker.spotlight( { gameobject } )
+		darker.spotlight( targets )
 	end
 end
