@@ -1,14 +1,28 @@
 # Defold Darker
 
 Модуль для создания эффекта "прожектора" (spotlight) в Defold. Выделяет указанные объекты, затемняя остальную часть экрана.
+Подразумевается использовать на gui ноде, которая будет перекрывать объекты, находящиеся под ней.
+Скрывать и показывать затемнение следует через управление самой gui-нодой с помощью API Defold.
+
+![image](https://github.com/user-attachments/assets/14ebeb78-ba49-4512-8769-ed91c24b767b)
+
 
 ## Установка
 1. Добавьте зависимость в `game.project`:
 https://github.com/ReanimatorXP/defold-darker/archive/refs/heads/master.zip
 
 2. Добавьте `/darker/darker.go` в основную коллекцию:
-3. Добавьте материал `/darker/materials/darker.material` в GUI и установите на вашу ноду, которая будет затемнять.
+
+![image](https://github.com/user-attachments/assets/eb4e9598-029f-400f-9506-8af13d7e761f)
+
+3. Добавьте материал `/darker/materials/darker.material` в GUI (A), создать ноду darker (B) и установите материал на вашу ноду (C).
+
+![image](https://github.com/user-attachments/assets/69f64be2-e1b0-43fe-8249-deb6618f2229)
+
 4. Нода не использует текстуру, просто установите нужный цвет в редакторе (используя нужную прозрачность).
+
+![image](https://github.com/user-attachments/assets/59c5c3c4-557d-477f-9a25-c648feced058)
+
 
 ## Настройка Render Script
 **Вариант 1:** Используйте готовый `/darker/render/darker.render_script` *(используется в нашем проекте)*
@@ -49,6 +63,9 @@ end
 
 ### Активация эффекта
 ```lua
+-- В начале файла
+local darker = require "darker.darker"
+
 -- Заготовленный url с кастомным именем компонента image
 local object5 = msg.url(nil, "object5", "image")
 
@@ -60,8 +77,13 @@ darker.spotlight({ go.get_id("object1"), -- хэш
                     object5 -- заготовленный url
                 })
 
--- ИЛИ через сообщение "spotlight"
+-- ИЛИ через сообщение "spotlight", тогда подключать darker не надо.
 msg.post("darker", "spotlight", { go.get_id("object1"), "object2", msg.url("object3"), msg.url("object4#image"), object5 })
+
+-- Очистить маску = передать nil или пустой массив
+darker.spotlight()
+darker.spotlight(nil)
+darker.spotlight({ })
 ```
 
 ### Управление видимостью
