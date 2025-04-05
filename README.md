@@ -63,6 +63,9 @@ end
 
 ### Активация эффекта
 ```lua
+-- В начале файла
+local darker = require "darker.darker"
+
 -- Заготовленный url с кастомным именем компонента image
 local object5 = msg.url(nil, "object5", "image")
 
@@ -74,8 +77,13 @@ darker.spotlight({ go.get_id("object1"), -- хэш
                     object5 -- заготовленный url
                 })
 
--- ИЛИ через сообщение "spotlight"
+-- ИЛИ через сообщение "spotlight", тогда подключать darker не надо.
 msg.post("darker", "spotlight", { go.get_id("object1"), "object2", msg.url("object3"), msg.url("object4#image"), object5 })
+
+-- Очистить маску = передать nil или пустой массив
+darker.spotlight()
+darker.spotlight(nil)
+darker.spotlight({ })
 ```
 
 ### Управление видимостью
