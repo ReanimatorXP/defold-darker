@@ -61,25 +61,32 @@ end
 
 -- Устанавливает цели для подсветки
 local function set_targets(go_ids)
-    print("Darker [set_targets]: Setting targets", go_ids)
-    assert(type(go_ids) == "table", "go_ids must be a table (array or map)")
-    assert(#go_ids > 0, "go_ids must not be empty")
-
     -- Очищаем предыдущие цели
     state.targets = {}
 
-    -- Сохраняем новые цели и их оригинальные материалы
-    for _, go_id in ipairs(go_ids) do
-        
-        local url = msg.url(go_id)
-        url.fragment = url.fragment or "sprite"
-        local material = go.get(url, "material")
-        if material then
-            state.targets[url] = material
-            print("Darker [set_targets]: Stored target", url)
-        else
-            print("Darker Warning [set_targets]: Could not get material for", url)
+    -- Если массив go_ids не пустой, устанавливаем новые цели
+    if go_ids and #go_ids > 0 then
+        print("Darker [set_targets]: Setting targets from array ", go_ids)
+
+        -- Сохраняем новые цели и их оригинальные материалы
+        for _, go_id in ipairs(go_ids) do
+            local url = msg.url(go_id)
+            url.fragment = url.fragment or "sprite"
+            if go.exists(url) then
+                local material = go.get(url, "material")
+                if material then
+                    state.targets[url] = material
+                    print("Darker [set_targets]: Stored target", url)
+                else
+                    print("Darker Warning [set_targets]: Could not get material for", url)
+                end
+            else
+                print("Darker Warning [set_targets]: GameObject does not exist", url)
+            end
         end
+    -- Если массив пустой, очищаем цели
+    else
+        print("Darker [set_targets]: Clear mask from spotlights")
     end
 
     return true
@@ -107,7 +114,12 @@ function M.apply_highlight_materials()
     print("Darker [apply_materials]: Applying highlight materials")
 
     for url, _ in pairs(state.targets) do
-        go.set(url, "material", M.highlight_go_mat)
+        if not go.exists(url) then
+            print("Darker Warning [apply_materials]: GameObject does not exist", url)
+            state.targets[url] = nil
+        else
+            go.set(url, "material", M.highlight_go_mat)
+        end
     end
 end
 
@@ -119,11 +131,6 @@ function M.update_mask()
     end
 
     print("Darker [update_mask]: Applying spotlight to saved targets")
-
-    if not next(state.targets) then
-        print("Darker Warning [update_mask]: No targets to highlight")
-        return false
-    end
 
     M.apply_highlight_materials()
 
