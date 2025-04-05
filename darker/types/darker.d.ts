@@ -1,6 +1,5 @@
 /** @noResolution */
-
-declare namespace darker {
+declare module 'darker.darker' {
     /**
      * Message hash constants used for communicating with the darker module
      */
@@ -11,8 +10,8 @@ declare namespace darker {
     /**
      * Global properties exposed by the module
      */
-    export var highlight_go_pred: userdata;
-    export var highlight_go_mat: resource;
+    export var highlight_go_pred: any;
+    export var highlight_go_mat: hash;
     export var mask_texture_sampler: string;
     export var script: url;
     
@@ -39,10 +38,10 @@ declare namespace darker {
     
     /**
      * Sets up spotlight effect for specified game objects
-     * @param {table} go_ids Array of game object IDs to highlight
+     * @param {hash[]} go_ids Array of game object IDs to highlight
      * @returns {boolean} True if spotlight was applied successfully, false otherwise
      */
-    export function spotlight(go_ids: table): boolean;
+    export function spotlight(go_ids: hash[]): boolean;
     
     /**
      * Draws the mask to the render target (called from render_script)
@@ -53,7 +52,7 @@ declare namespace darker {
      * Gets the render target for the mask
      * @returns {userdata} The render target for the mask
      */
-    export function get_mask_rt(): userdata;
+    export function get_mask_rt(): any;
     
     /**
      * Handles window resize events, updating the render target size
