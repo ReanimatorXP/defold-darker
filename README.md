@@ -9,7 +9,7 @@
 4. Нода не использует текстуру, просто установите нужный цвет в редакторе (используя нужную прозрачность).
 
 ## Настройка Render Script
-**Вариант 1:** Используйте готовый `/darker/render/darker.render_script`.
+**Вариант 1:** Используйте готовый `/darker/render/darker.render_script` *(используется в нашем проекте)*
 
 **Вариант 2:** Измените свой скрипт:
 ```lua
@@ -41,14 +41,25 @@ end
 ```
 
 ## Использование
+Можно передавать объекты как `id`, `строки с именем`, `url` или `хэши` — модуль сам определит тип.  
+Если у объекта компонент спрайта называется по умолчанию `"sprite"`, его имя указывать не нужно.  
+Если у компонента другое имя, его следует указать через `#`, например: `"object#custom_sprite"` или составить готовый url.
 
 ### Активация эффекта
 ```lua
--- Прямой вызов функции
-darker.spotlight({ go.get_id("object1"), go.get_id("object2") })
+-- Заготовленный url с кастомным именем компонента image
+local object5 = msg.url(nil, "object5", "image")
 
--- ИЛИ через сообщение
-msg.post("darker", hash("spotlight"), { go.get_id("object1"), go.get_id("object2") })
+-- Прямой вызов функции
+darker.spotlight({ go.get_id("object1"), -- хэш
+                    "object2", -- строка с именем go
+                    msg.url("object3"), -- url со стандартным именем компонента sprite
+                    msg.url("object4#image"), -- url с кастомным именем компонента sprite
+                    object5 -- заготовленный url
+                })
+
+-- ИЛИ через сообщение "spotlight"
+msg.post("darker", "spotlight", { go.get_id("object1"), "object2", msg.url("object3"), msg.url("object4#image"), object5 })
 ```
 
 ### Управление видимостью
