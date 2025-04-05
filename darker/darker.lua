@@ -3,10 +3,7 @@
 
 local M = {}
 
--- --- Конфигурация (можно вынести во внешний файл или передавать в init) ---
 local HIGHLIGHT_PREDICATE = "highlight_go" -- Предикат для рендера в маску
---------------------------------------------------------------------------
-
 local BLACK_COLOR = vmath.vector4(0, 0, 0, 0) -- Цвет для очистки RT (черный с альфа 0)
 
 -- Сообщения для управления эффектом
@@ -19,15 +16,14 @@ local state = {
     is_active = false,              -- Активен ли эффект в данный момент
     needs_mask_update = false,      -- Нужно ли обновить маску в рендер-скрипте
     targets = {},                   -- { [url] = original_material_resource } - Хранит URL и оригинальный ресурс материала
-    restore_timer_handle = nil,     -- Хэндл таймера для восстановления материалов
-    mask_rt = nil,                  -- Хэндл Render Target
+    rt_mask = nil,                  -- Хэндл Render Target
     rt_params = nil,                -- Параметры для RT, заполняются в create_render_target
 }
 
-M.highlight_go_pred = nil -- Предикат для рендеринга в маску (глобальная переменная для доступа из других модулей)
-M.highlight_go_mat = nil -- Материал для подсветки (глобальная переменная для доступа из других модулей)
+M.highlight_go_pred = nil           -- Предикат для рендеринга в маску
+M.highlight_go_mat = nil            -- Материал для подсветки
 M.mask_texture_sampler = 'mask_texture' -- Имя текстуры для маски (глобальная переменная для доступа из других модулей)
-M.script = nil -- GO URL для отправки сообщений
+M.script = nil                      -- URL Darker-script для отправки сообщений
 ----------------------
 
 -- --- Внутренние функции ---
@@ -35,9 +31,9 @@ M.script = nil -- GO URL для отправки сообщений
 -- Создает или обновляет Render Target для маски
 local function create_render_target()
     -- Если RT уже существует, удаляем старый (на случай изменения размера окна в будущем)
-    if state.mask_rt then
-        render.delete_render_target(state.mask_rt)
-        state.mask_rt = nil
+    if state.rt_mask then
+        render.delete_render_target(state.rt_mask)
+        state.rt_mask = nil
     end
 
     -- Получаем текущие размеры окна для RT через render API
@@ -54,9 +50,9 @@ local function create_render_target()
     }
 
     -- Создаем новый RT, используя параметры из state.rt_params
-    state.mask_rt = render.render_target("darker_mask_rt", state.rt_params)
+    state.rt_mask = render.render_target("darker_mask_rt", state.rt_params)
 
-    if state.mask_rt then
+    if state.rt_mask then
         print("Darker: Render Target created/updated (" .. window_width .. "x" .. window_height .. ")")
     else
         print("Darker Error: Failed to create Render Target")
@@ -74,7 +70,9 @@ local function set_targets(go_ids)
 
     -- Сохраняем новые цели и их оригинальные материалы
     for _, go_id in ipairs(go_ids) do
-        local url = msg.url(nil, go_id, "sprite")
+        
+        local url = msg.url(go_id)
+        url.fragment = url.fragment or "sprite"
         local material = go.get(url, "material")
         if material then
             state.targets[url] = material
@@ -137,8 +135,6 @@ end
 
 -- Устанавливает подсветку для указанных GO
 function M.spotlight(go_ids)
-    print("Darker [set_mask]: Setting mask for", go_ids)
-
     if set_targets(go_ids) then
         return M.update_mask()
     end
@@ -148,34 +144,37 @@ end
 
 -- Функция отрисовки маски
 function M.draw_mask()
-    -- Проверяем, существует ли RT и нужно ли обновление
-    if not state.mask_rt then
-        print("Darker Error [draw_mask]: Mask Render Target not available for drawing.")
-        return
-    end
-
+    -- Рисуем маску только если она была обновлена
     if state.needs_mask_update then
+
+        -- Проверяем, существует ли RT
+        if not state.rt_mask then
+            print("Darker Error [draw_mask]: Mask Render Target not available for drawing.")
+            return
+        end
+
         print("Darker [draw_mask]: Drawing mask to Render Target")
-        render.set_render_target(state.mask_rt)
+        render.set_render_target(state.rt_mask)
         render.clear({[graphics.BUFFER_TYPE_COLOR0_BIT] = BLACK_COLOR})
         render.draw(M.highlight_go_pred)
         render.set_render_target(render.RENDER_TARGET_DEFAULT)
-        state.needs_mask_update = false
 
+        -- Маска обновлена
+        state.needs_mask_update = false
+        -- Возвращаем оригинальные материалы
         msg.post(M.script, M.MSG_REVERT_ORIGINAL_MATERIALS)
     end
 end
 
---- Gets the render target for the mask
---- @return string|userdata The render target for the mask
+--- Возвращает хэндл Render Target для использования в рендер-скрипте
+--- @return string|userdata Созданный Render Target
 function M.get_mask_rt()
-    -- Возвращает хэндл Render Target для использования в рендер-скрипте
-    return state.mask_rt
+    return state.rt_mask
 end
 
 -- --- Обработка изменения размера окна ---
 function M.on_window_resized()
-    render.set_render_target_size(state.mask_rt, render.get_window_width(), render.get_window_height())
+    render.set_render_target_size(state.rt_mask, render.get_window_width(), render.get_window_height())
 
     if state.is_active then
         print("Darker: Window resized, Render Target updated")
