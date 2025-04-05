@@ -1,14 +1,28 @@
 local darker = require "darker.darker"
 
 function init(self)
-	self.num = 2
+	-- Получаем фокус ввода
 	msg.post('.', "acquire_input_focus")
+	-- Подсвечиваем средний объект
+	self.num = 2
 	darker.spotlight( { go.get_id("defold" .. self.num) } )
 end
 
 function on_input(self, action_id, action)
+	-- Меняем подсветку при нажатии на экран
 	if action_id == hash("touch") and action.released then
+		-- Карусельный цикл
 		self.num = self.num % 3 + 1
-		darker.spotlight( { go.get_id("defold" .. self.num) } )
+
+		-- У первого объекта компонент sprite имеет имя "image"
+		-- У остальных объектов - стардартное имя "sprite", можно не указывать
+		local gameobject
+		if self.num == 1 then
+			gameobject = msg.url("defold1#image")
+		else
+			gameobject = go.get_id("defold" .. self.num)
+		end
+
+		darker.spotlight( { gameobject } )
 	end
 end
